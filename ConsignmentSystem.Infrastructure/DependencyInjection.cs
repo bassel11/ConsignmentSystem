@@ -35,32 +35,26 @@ namespace ConsignmentSystem.Infrastructure
             services.AddScoped<IReceiptPdfGenerator, ReceiptPdfGenerator>();
             services.AddDataProtection();
 
-            // 2. إعداد محرك الهوية مع تطبيق معايير الأمان للأنظمة المالية
             services.AddIdentityCore<ApplicationUser>(options =>
             {
-                // إعدادات كلمة المرور الصارمة
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 8;
 
-                // إعدادات الحظر لحماية النظام من هجمات التخمين (Brute Force)
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
 
-                // اشتراط فرادة الإيميل
                 options.User.RequireUniqueEmail = true;
             })
-                .AddRoles<ApplicationRole>() // استخدام الكلاس المخصص
+                .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders(); // الآن ستعمل بدون أخطاء بفضل -FrameworkReference
+                .AddDefaultTokenProviders();
 
-            // 💡 تسجيل IIdentityService
             services.AddScoped<IIdentityService, IdentityService>();
 
-            // 💡 إعدادات الـ JWT Bearer Authentication
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -68,7 +62,7 @@ namespace ConsignmentSystem.Infrastructure
             })
             .AddJwtBearer(options =>
             {
-                options.RequireHttpsMetadata = false; // اجعله true في بيئة الإنتاج
+                options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -79,7 +73,7 @@ namespace ConsignmentSystem.Infrastructure
                     ValidateAudience = true,
                     ValidAudience = configuration["JwtSettings:Audience"],
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero // إلغاء وقت السماح الإضافي لتنتهي صلاحية التوكن بدقة
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
