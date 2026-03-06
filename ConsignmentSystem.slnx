@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ConsignmentSystem.API/ConsignmentSystem.API.csproj" />
+  <Project Path="ConsignmentSystem.Application/ConsignmentSystem.Application.csproj" />
+  <Project Path="ConsignmentSystem.Domain/ConsignmentSystem.Domain.csproj" />
+  <Project Path="ConsignmentSystem.Infrastructure/ConsignmentSystem.Infrastructure.csproj" />
+</Solution>
