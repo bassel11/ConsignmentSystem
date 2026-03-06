@@ -16,6 +16,20 @@ As a software engineer, I focus on building systems that are not just functional
 
 ---
 
+    ## 🗄️ Database Schema & Data Dictionary
+
+The system employs a highly normalized relational database design. All business tables inherit from an `AuditableEntity` base class, meaning they are automatically stamped with `CreatedAt`, `CreatedBy`, `UpdatedAt`, and `UpdatedBy` via Entity Framework Core Interceptors. Logical deletion is enforced globally (`IsDeleted`).
+
+| Table Name | Data Type | Business Purpose & Architectural Role |
+| :--- | :--- | :--- |
+| **`Users` & `Roles`** | Security / Identity | Managed by ASP.NET Core Identity. Handles authentication, password hashing, and Role-Based Access Control (RBAC). |
+| **`Vendors`** | Master Data | Represents the consignor (business partner). Stores contact info and the contractual `DefaultCommissionPercentage`. |
+| **`Vehicles`** | Core Aggregate | The logistical anchor of the system. Goods and sales are tied to a `Vehicle` (via `LicensePlate`), not directly to the Vendor, allowing for granular shipment tracking. |
+| **`ConsignmentReceipts`** | Document Header | The physical intake document for received goods. Contains the reference `ReceiptNumber` and date of intake. |
+| **`ConsignmentItems`** | Inventory Engine | Represents the actual goods. Crucially, it tracks both `QuantityReceived` and `QuantitySold`. Available stock is dynamically calculated, preventing negative inventory. |
+| **`SaleTransactions`** | Financial Ledger | Records every individual point-of-sale action. Contains an immutable `IsInvoiced` boolean flag to absolutely prevent double-billing the vendor. |
+| **`Invoices`** | Settlement | The final financial output. Aggregates sales, applies the commission override (or default), subtracts expenses, and locks the final `NetPayable` amount. |
+
 ##  Entity Relationship Diagram (ERD)
 
 The database schema is designed to enforce relational integrity and separate master data from transactional data.
@@ -74,18 +88,3 @@ erDiagram
         decimal ExpensesAmount
         decimal NetPayable
     }
-
-
-    ## 🗄️ Database Schema & Data Dictionary
-
-The system employs a highly normalized relational database design. All business tables inherit from an `AuditableEntity` base class, meaning they are automatically stamped with `CreatedAt`, `CreatedBy`, `UpdatedAt`, and `UpdatedBy` via Entity Framework Core Interceptors. Logical deletion is enforced globally (`IsDeleted`).
-
-| Table Name | Data Type | Business Purpose & Architectural Role |
-| :--- | :--- | :--- |
-| **`Users` & `Roles`** | Security / Identity | Managed by ASP.NET Core Identity. Handles authentication, password hashing, and Role-Based Access Control (RBAC). |
-| **`Vendors`** | Master Data | Represents the consignor (business partner). Stores contact info and the contractual `DefaultCommissionPercentage`. |
-| **`Vehicles`** | Core Aggregate | The logistical anchor of the system. Goods and sales are tied to a `Vehicle` (via `LicensePlate`), not directly to the Vendor, allowing for granular shipment tracking. |
-| **`ConsignmentReceipts`** | Document Header | The physical intake document for received goods. Contains the reference `ReceiptNumber` and date of intake. |
-| **`ConsignmentItems`** | Inventory Engine | Represents the actual goods. Crucially, it tracks both `QuantityReceived` and `QuantitySold`. Available stock is dynamically calculated, preventing negative inventory. |
-| **`SaleTransactions`** | Financial Ledger | Records every individual point-of-sale action. Contains an immutable `IsInvoiced` boolean flag to absolutely prevent double-billing the vendor. |
-| **`Invoices`** | Settlement | The final financial output. Aggregates sales, applies the commission override (or default), subtracts expenses, and locks the final `NetPayable` amount. |
